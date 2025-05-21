@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Meals from './pages/Meals';
@@ -12,10 +12,16 @@ import supabase from './lib/supabaseClient';
 
 function App() {
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data?.user ?? null);
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
     });
 
     const {
@@ -31,7 +37,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar user={user} handleLogout={handleLogout} />
       <main className="flex-grow container mx-auto p-4">
         <Routes>
           <Route path="/" element={<Home />} />
