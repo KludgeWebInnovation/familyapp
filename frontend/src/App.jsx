@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Meals from './pages/Meals';
 import Tasks from './pages/Tasks';
 import Finance from './pages/Finance';
+import Intake from './pages/Intake';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import NotFound from './pages/NotFound';
@@ -53,6 +54,7 @@ function App() {
             path="/finance"
             element={user ? <Finance /> : <Navigate to="/login" replace />}
           />
+          <Route path="/intake" element={<Intake />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<NotFound />} />
