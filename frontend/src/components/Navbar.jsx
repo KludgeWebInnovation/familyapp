@@ -14,6 +14,8 @@ function Navbar() {
           <NavLink to="/meals" className={({ isActive }) => `${linkClass} ${isActive ? 'font-semibold' : ''}`}>Meals</NavLink>
           <NavLink to="/tasks" className={({ isActive }) => `${linkClass} ${isActive ? 'font-semibold' : ''}`}>Tasks</NavLink>
           <NavLink to="/finance" className={({ isActive }) => `${linkClass} ${isActive ? 'font-semibold' : ''}`}>Finance</NavLink>
+          <NavLink to="/login" className={({ isActive }) => `${linkClass} ${isActive ? 'font-semibold' : ''}`}>Login</NavLink>
+          <NavLink to="/signup" className={({ isActive }) => `${linkClass} ${isActive ? 'font-semibold' : ''}`}>Signup</NavLink>
         </div>
       </div>
     </nav>

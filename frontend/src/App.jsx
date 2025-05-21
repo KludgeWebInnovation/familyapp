@@ -5,6 +5,8 @@ import Home from './pages/Home';
 import Meals from './pages/Meals';
 import Tasks from './pages/Tasks';
 import Finance from './pages/Finance';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
           <Route path="/meals" element={<Meals />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/finance" element={<Finance />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
         </Routes>
       </main>
     </div>
