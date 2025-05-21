@@ -74,8 +74,15 @@ function Meals() {
       if (!res.ok) throw new Error('Failed to generate plan');
       const json = await res.json();
       const content =
-        (Array.isArray(json) ? json[0]?.generated_text : json.generated_text) ?.trim();
+        (Array.isArray(json) ? json[0]?.generated_text : json.generated_text)?.trim();
       setPlan(content || '');
+
+      const weekStart = getCurrentWeekStart();
+      await supabase
+        .from('meal_plans')
+        .upsert({ user_id: user.id, week_start: weekStart, plan: content }, {
+          onConflict: 'user_id,week_start',
+        });
     } catch (err) {
       console.error(err);
       setError(err.message || 'Error generating plan');
@@ -84,7 +91,38 @@ function Meals() {
   };
 
   useEffect(() => {
-    fetchPlan();
+    const loadPlan = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        const weekStart = getCurrentWeekStart();
+        const { data: existing, error } = await supabase
+          .from('meal_plans')
+          .select('plan')
+          .eq('user_id', user.id)
+          .eq('week_start', weekStart)
+          .single();
+
+        if (existing && !error) {
+          setPlan(existing.plan);
+          setLoading(false);
+          return;
+        }
+
+        await fetchPlan();
+      } catch (err) {
+        console.error(err);
+        setError(err.message || 'Error generating plan');
+        setLoading(false);
+      }
+    };
+
+    loadPlan();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
