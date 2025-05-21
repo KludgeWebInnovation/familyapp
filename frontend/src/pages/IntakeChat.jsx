@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../lib/supabaseClient';
 
@@ -45,21 +45,29 @@ const questions = [
 
 function IntakeChat() {
   const navigate = useNavigate();
+  const messagesEndRef = useRef(null);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
+  const ackMessages = ['Got it!', 'Thanks!', 'Okay!'];
+
+  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
   const addMessage = (from, text) => {
     setMessages((prev) => [...prev, { from, text }]);
   };
 
   useEffect(() => {
-    addMessage('assistant', questions[0].text);
+    setMessages([{ from: 'assistant', text: questions[0].text }]);
     setInputValue('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const formatValue = (val) => {
     if (Array.isArray(val)) return val.join(', ');
@@ -71,25 +79,23 @@ function IntakeChat() {
     const q = questions[index];
     const value = inputValue;
     if (q.type === 'multi') {
-      if (!Array.isArray(value) || value.length === 0) return; // require selection
+      if (!Array.isArray(value) || value.length === 0) return;
     } else if (q.type === 'number' && value === '') return;
 
     setAnswers((prev) => ({ ...prev, [q.id]: value }));
     addMessage('user', formatValue(value));
-    addMessage('assistant', 'Got it!');
+    await delay(500 + Math.random() * 500);
+    addMessage('assistant', ackMessages[Math.floor(Math.random() * ackMessages.length)]);
+    await delay(500);
 
     if (index < questions.length - 1) {
       const nextIndex = index + 1;
-      addMessage('assistant', questions[nextIndex].text);
       setIndex(nextIndex);
       const nextQ = questions[nextIndex];
       setInputValue(
-        nextQ.type === 'multi'
-          ? []
-          : nextQ.type === 'toggle'
-          ? false
-          : ''
+        nextQ.type === 'multi' ? [] : nextQ.type === 'toggle' ? false : ''
       );
+      setMessages([{ from: 'assistant', text: nextQ.text }]);
     } else {
       await saveProfile({ ...answers, [q.id]: value });
     }
@@ -125,7 +131,7 @@ function IntakeChat() {
     const prevQ = questions[prevIndex];
     const prevValue = answers[prevQ.id];
     setInputValue(prevValue !== undefined ? prevValue : '');
-    addMessage('assistant', prevQ.text);
+    setMessages([{ from: 'assistant', text: prevQ.text }]);
   };
 
   const toggleMultiValue = (val) => {
@@ -184,14 +190,22 @@ function IntakeChat() {
     }
     if (q.type === 'toggle') {
       return (
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={!!inputValue}
-            onChange={(e) => setInputValue(e.target.checked)}
-          />
-          <span>{inputValue ? 'Yes' : 'No'}</span>
-        </label>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setInputValue(true)}
+            className={`px-3 py-2 rounded border ${inputValue === true ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            Yes
+          </button>
+          <button
+            type="button"
+            onClick={() => setInputValue(false)}
+            className={`px-3 py-2 rounded border ${inputValue === false ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          >
+            No
+          </button>
+        </div>
       );
     }
     return null;
@@ -212,6 +226,7 @@ function IntakeChat() {
             {m.text}
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <div className="mt-auto space-y-2">
         {renderInput()}
