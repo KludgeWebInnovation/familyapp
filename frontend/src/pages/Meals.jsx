@@ -72,9 +72,10 @@ function Meals() {
         }
       );
       if (!res.ok) throw new Error('Failed to generate plan');
-      const json = await res.json();
+        const json = await res.json();
         const content =
           (Array.isArray(json) ? json[0]?.generated_text : json.generated_text)?.trim();
+        console.log('🧠 Generated new plan from Hugging Face');
         setPlan(content || '');
 
       const weekStart = getCurrentWeekStart();
@@ -112,6 +113,7 @@ function Meals() {
             .single();
 
           if (existing && !error) {
+            console.log('✅ Loaded plan from Supabase');
             setPlan(existing.plan?.text || '');
             setLoading(false);
             return;
