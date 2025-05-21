@@ -47,21 +47,25 @@ function Meals() {
       if (profileError) throw profileError;
 
       const prompt = generatePrompt(profile);
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
+      const apiKey = import.meta.env.VITE_HUGGINGFACE_API_KEY;
+      const res = await fetch(
+        'https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            inputs: prompt,
+            parameters: { max_new_tokens: 500 },
+          }),
+        }
+      );
       if (!res.ok) throw new Error('Failed to generate plan');
       const json = await res.json();
-      const content = json.choices?.[0]?.message?.content?.trim();
+      const content =
+        (Array.isArray(json) ? json[0]?.generated_text : json.generated_text) ?.trim();
       setPlan(content || '');
     } catch (err) {
       console.error(err);
