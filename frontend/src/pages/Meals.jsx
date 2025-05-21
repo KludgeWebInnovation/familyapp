@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import supabase from '../lib/supabaseClient';
 
 function getCurrentWeekStart() {
@@ -39,6 +40,7 @@ function Meals() {
   const [plan, setPlan] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const fetchPlan = async () => {
     setLoading(true);
@@ -103,6 +105,17 @@ function Meals() {
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) throw new Error('Not authenticated');
+
+        const { data: profileCheck, error: profileCheckError } = await supabase
+          .from('meal_profiles')
+          .select('user_id')
+          .eq('user_id', user.id);
+        if (profileCheckError) throw profileCheckError;
+        if (!profileCheck || profileCheck.length === 0) {
+          setLoading(false);
+          navigate('/intake');
+          return;
+        }
 
         const weekStart = getCurrentWeekStart();
           const { data: existing, error } = await supabase
