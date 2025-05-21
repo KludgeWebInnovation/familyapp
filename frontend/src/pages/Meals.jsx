@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import supabase from '../lib/supabaseClient';
 
+function getCurrentWeekStart() {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = (day + 6) % 7; // days since Monday
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - diff);
+  return monday.toISOString().split('T')[0];
+}
+
 function generatePrompt(profile) {
   if (!profile) return '';
   const {
