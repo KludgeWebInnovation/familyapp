@@ -13,7 +13,7 @@ This repository contains the frontend scaffolded with **React**, **Vite**, and *
    ```bash
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_OPENAI_API_KEY=your_openai_key
+   VITE_HUGGINGFACE_API_KEY=your_huggingface_key
    ```
 3. Start the development server:
    ```bash
